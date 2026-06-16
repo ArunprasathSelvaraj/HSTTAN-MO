@@ -1,0 +1,108 @@
+# HSTTAN-MO Default Configuration
+# Based on Section 4.3 of the paper
+
+model:
+  input_seq_len: 96           # Input sequence length (hours)
+  forecast_horizon: 48        # Forecast horizon (hours)
+  hidden_dim: 256             # Hidden dimension
+  n_encoder_layers: 4         # Transformer encoder layers
+  n_decoder_layers: 2         # Transformer decoder layers
+  n_heads: 8                  # Attention heads
+  dropout: 0.1                # Dropout rate
+  n_temporal_scales: 8        # Number of temporal resolutions
+  temporal_scales:            # Temporal resolutions (hours)
+    - 1                       # Hourly
+    - 24                      # Diurnal
+    - 168                     # Weekly
+    - 720                     # Monthly
+    - 2160                    # Seasonal
+    - 8760                    # Yearly
+    - -1                      # Event-driven (dynamic)
+    - -2                      # Cyclic (dynamic)
+
+gnn:
+  n_layers: 3                 # GNN layers
+  embedding_dim: 64           # Node embedding dimension
+  interleave_every: 2         # GNN interleaved every N transformer layers
+
+drl:
+  algorithm: SAC              # Soft Actor-Critic
+  gamma: 0.99                 # Discount factor
+  beta: 0.2                   # Entropy regularization
+  lr_actor: 0.0003
+  lr_critic: 0.0003
+  buffer_size: 100000
+  batch_size: 256
+  tau: 0.005                  # Soft update coefficient
+  reward_weights:             # 15 sustainability indicators (Table 1)
+    collection_cost: 0.08
+    vehicle_utilization: 0.06
+    labor_efficiency: 0.06
+    fuel_consumption: 0.07
+    maintenance_cost: 0.05
+    co2_emissions: 0.10
+    landfill_diversion: 0.08
+    recycling_quality: 0.07
+    energy_recovery: 0.05
+    leachate_production: 0.04
+    noise_pollution: 0.06
+    traffic_disruption: 0.06
+    community_satisfaction: 0.07
+    worker_safety: 0.08
+    accessibility_equity: 0.07
+
+info_feedback:
+  lambda_mi: 0.1              # Mutual information weight in total loss
+  batch_size: 64
+
+pso_ga:
+  population_size: 50
+  n_generations: 50
+  inertia_w: 0.7
+  c1: 1.5                     # Cognitive coefficient
+  c2: 1.5                     # Social coefficient
+  mutation_prob: 0.1
+  elite_fraction: 0.2         # Top 20% used for GA crossover
+  replace_fraction: 0.2       # Bottom 20% replaced
+
+training:
+  epochs: 200
+  batch_size: 64
+  lr: 0.001
+  lr_scheduler: cosine
+  warmup_epochs: 10
+  grad_clip: 1.0
+  early_stopping_patience: 20
+  seed: 42
+
+simulation:
+  n_zones: 20
+  fleet_size: 30
+  vehicle_capacity_tons: 15
+  urban_speed_kmh: 25
+  suburban_speed_kmh: 45
+  operating_hours: [6, 18]
+  fuel_cost_per_L: 1.15
+  fuel_L_per_km: 0.45
+  labor_cost_per_h: 28.0
+  labor_overhead: 1.2
+  maintenance_cost_per_km: 0.18
+  overflow_penalty: 250.0
+  ef_base_kg_per_km: 0.98
+  ef_idle_kg_per_h: 2.3
+  contamination_rate: 0.12
+  sorting_efficiency: 0.88
+
+data:
+  train_years: [2021, 2022, 2023]   # Synthetic: 3-year demo
+  val_split: 0.15
+  test_split: 0.15
+  missing_interp_threshold_h: 6
+  outlier_iqr_multiplier: 3.0
+  outlier_cap_percentile: 99
+
+paths:
+  data_dir: datasets/synthetic
+  results_dir: results
+  checkpoint_dir: results/checkpoints
+  log_dir: results/logs
